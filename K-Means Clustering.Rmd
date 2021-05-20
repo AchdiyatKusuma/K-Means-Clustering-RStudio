@@ -1,0 +1,76 @@
+---
+title: "Assignment 17"
+author: "Achdiyat Kusuma"
+date: "4/27/2021"
+output: html_document
+---
+
+```{r}
+library(tidyverse) # data manipulation
+library(cluster) # clustering algorithms
+library(factoextra)
+library(gridExtra)
+setwd("C:/Users/user/Desktop/KURSUS/DATA SETS")
+getwd()
+mov <- read.csv('customer_movie_rating.csv')
+head(mov)
+```
+
+```{r}
+mov <- na.omit(mov)
+mov <- scale(mov)
+head(mov)
+```
+
+```{r}
+k <- kmeans(mov, centers = 5, nstart = 25)
+str(k)
+```
+
+```{r}
+fviz_cluster(k, data = mov)
+```
+
+```{r}
+mov %>%
+as_tibble() %>%
+mutate(cluster = k$cluster,
+state = row.names(mov)) %>%
+ggplot(aes(Horror, Romcom, Action, Comedy, Fantasy, color =
+factor(cluster), label = state)) +
+geom_text()
+```
+
+```{r}
+k2 <- kmeans(mov, centers = 2, nstart = 25)
+k3 <- kmeans(mov, centers = 3, nstart = 25)
+k4 <- kmeans(mov, centers = 4, nstart = 25)
+# plots to compare
+p2 <- fviz_cluster(k2, geom = "point", data = mov) + ggtitle("k = 2")
+p3 <- fviz_cluster(k3, geom = "point", data = mov) + ggtitle("k = 3")
+p4 <- fviz_cluster(k4, geom = "point", data = mov) + ggtitle("k = 4")
+p5 <- fviz_cluster(k, geom = "point", data = mov) + ggtitle("k = 5")
+library(gridExtra)
+grid.arrange(p2, p3, p4, p5, nrow = 2)
+```
+
+```{r}
+set.seed(123)
+fviz_nbclust(mov, kmeans, method = "wss")
+```
+```{r}
+set.seed(123)
+fviz_nbclust(mov, kmeans, method =
+"silhouette")
+```
+#K2 Distributed the data into 2 Clusters with no collision with each of the data. This one is also what is considered the best Number of clusters by using elbow and silhoutte methods
+
+#K3 Even though there are no Collision of data, this one is considered not as effective
+
+#K4 While there is one cluster that remains the same, the other clusters have too much data that collide with each other and it become hard to see
+
+#K5 Even though it supposedly represent each variable of the data, the graph become even more crowded on the left side and is now even harder to see
+
+
+# Conclusion : From the data above, we can plainly see that as suggested by the using the elbow and silhoutte graph the best K-means for this data is K2 (the ones with 2 clusters). The K2 graph can be easily understood as it divides the data into 2 major cluster with no collision with each data.
+
